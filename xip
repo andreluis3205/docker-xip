@@ -6,15 +6,16 @@ shopt -s nocasematch
 # Configuration
 #
 XIP_DOMAIN=${XIP_DOMAIN:-"xip.test"}
-XIP_ROOT_ADDRESSES=${XIP_ROOT_ADDRESS:-( "127.0.0.1" )}
-XIP_NS_ADDRESSES=${XIP_NS_ADDRESS:-( "127.0.0.1" )}
+XIP_ADMIN=${XIP_ADMIN:-"admin.$XIP_DOMAIN"}
+[ -n "$XIP_ROOT_ADDRESSES" ] && IFS=' ' read -r -a XIP_ROOT_ADDRESSES <<< "$XIP_ROOT_ADDRESSES" || XIP_ROOT_ADDRESSES=( "127.0.0.1" )
+[ -z ${XIP_NS_ADDRESSES+x} ] && XIP_NS_ADDRESSES=( "127.0.0.1" )
+[ -n "$XIP_NS_SERVERS" ] && IFS=' ' read -r -a XIP_NS_SERVERS <<< "$XIP_NS_SERVERS"
 XIP_TIMESTAMP=${XIP_TIMESTAMP:-"0"}
 XIP_TTL=${XIP_TTL:-300}
 
 if [ -a "$1" ]; then
   source "$1"
 fi
-
 
 #
 # Protocol helpers
@@ -116,16 +117,22 @@ resolve_base36_subdomain() {
 }
 
 answer_soa_query() {
-  send_answer "SOA" "admin.$XIP_DOMAIN ns-1.$XIP_DOMAIN $XIP_TIMESTAMP $XIP_TTL $XIP_TTL $XIP_TTL $XIP_TTL"
+  send_answer "SOA" "$XIP_ADMIN ${XIP_NS_SERVERS[0]:-"ns-1.$XIP_DOMAIN"} $XIP_TIMESTAMP $XIP_TTL $XIP_TTL $XIP_TTL $XIP_TTL"
 }
 
 answer_ns_query() {
-  local i=1
   local ns_address
-  for ns_address in "${XIP_NS_ADDRESSES[@]}"; do
-    send_answer "NS" "ns-$i.$XIP_DOMAIN"
-    let i+=1
+  for ns_address in "${XIP_NS_SERVERS[@]}"; do
+    send_answer "NS" "$ns_address"
   done
+
+  if [ -n "$XIP_NS_ADDRESSES" ]; then
+    local i=1
+    for ns_address in "${XIP_NS_ADDRESSES[@]}"; do
+      send_answer "NS" "ns-$i.$XIP_DOMAIN"
+      let i+=1
+    done
+  fi
 }
 
 answer_root_a_query() {

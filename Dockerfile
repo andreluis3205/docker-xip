@@ -1,5 +1,5 @@
 FROM ubuntu:12.04
-MAINTAINER callbacknull <callbacknull@gmail.com>
+MAINTAINER honzahommer <honza@hommer.cz>
 
 ENV DEBIAN_FRONTEND noninteractive
 EXPOSE 53/udp
