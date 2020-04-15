@@ -117,7 +117,7 @@ resolve_base36_subdomain() {
 }
 
 answer_soa_query() {
-  send_answer "SOA" "$XIP_ADMIN ${XIP_NS_SERVERS[0]:-"ns-1.$XIP_DOMAIN"} $XIP_TIMESTAMP $XIP_TTL $XIP_TTL $XIP_TTL $XIP_TTL"
+  send_answer "SOA" "${XIP_NS_SERVERS[0]:-"ns-1.$XIP_DOMAIN"} $XIP_ADMIN $XIP_TIMESTAMP $XIP_TTL $XIP_TTL $XIP_TTL $XIP_TTL"
 }
 
 answer_ns_query() {
